@@ -16,18 +16,22 @@ const msgBufferSize = 500
 
 type keyValueServer struct {
 	// TODO: implement this!
-	listener           net.Listener
-	clients            map[net.Conn]chan []byte
 	quit               bool
-	clientActiveChan   chan net.Conn
+	listener           net.Listener
 	clientDropChan     chan net.Conn
-	clientsActiveCount int
+	clientActivateChan chan net.Conn
+	clients            map[net.Conn]chan []byte
 }
 
 // New creates and returns (but does not start) a new KeyValueServer.
 func New() KeyValueServer {
 	// TODO: implement this!
-	server := keyValueServer{nil, make(map[net.Conn]chan []byte), false, make(chan net.Conn, 1), make(chan net.Conn, 1), 0}
+	server := keyValueServer{
+		quit:               false,
+		listener:           nil,
+		clientDropChan:     make(chan net.Conn, 1),
+		clientActivateChan: make(chan net.Conn, 1),
+		clients:            make(map[net.Conn]chan []byte)}
 	return &server
 }
 
@@ -56,7 +60,7 @@ func (kvs *keyValueServer) Close() {
 
 func (kvs *keyValueServer) Count() int {
 	// TODO: implement this!
-	return kvs.clientsActiveCount
+	return len(kvs.clients)
 }
 
 func (kvs *keyValueServer) StartModel2(port int) error {
@@ -95,16 +99,15 @@ func acceptClients(kvs *keyValueServer) {
 			fmt.Println(err)
 			return
 		}
-		kvs.clientActiveChan <- conn
+		kvs.clientActivateChan <- conn
 	}
 }
 
 func handleConnections(kvs *keyValueServer) {
 	for {
 		select {
-		case conn := <-kvs.clientActiveChan:
+		case conn := <-kvs.clientActivateChan:
 			kvs.clients[conn] = make(chan []byte, msgBufferSize)
-			kvs.clientsActiveCount++
 			go readFromClient(kvs, conn)
 			go writeToClient(kvs, conn)
 		case conn := <-kvs.clientDropChan:
@@ -165,5 +168,4 @@ func writeToClient(kvs *keyValueServer, conn net.Conn) {
 func removeClient(kvs *keyValueServer, conn net.Conn) {
 	conn.Close()              //closes connection
 	delete(kvs.clients, conn) //deletes it from map
-	kvs.clientsActiveCount--  //decrements the count
 }

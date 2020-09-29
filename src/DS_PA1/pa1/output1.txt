@@ -13,837 +13,454 @@ All clients beginning to read...
 ========== TestBasic5: 5 client(s), 750 get requests each ==========
 All clients beginning to write...
 All clients beginning to read...
-========== TestBasic6: 10 client(s), 1500 get requests each ==========
-All clients beginning to write...
-All clients beginning to read...
-fatal error: concurrent map writes
+fatal error: concurrent map read and map write
 
-goroutine 132 [running]:
-runtime.throw(0x848834, 0x15)
-	/usr/local/go/src/runtime/panic.go:617 +0x72 fp=0xc00034fd00 sp=0xc00034fcd0 pc=0x42f0d2
-runtime.mapassign_faststr(0x7cb420, 0xc0000fb200, 0xc0001fc730, 0x9, 0xc0001fc730)
-	/usr/local/go/src/runtime/map_faststr.go:211 +0x42a fp=0xc00034fd68 sp=0xc00034fd00 pc=0x41482a
-DS_PA1/pa1.put(...)
-	/home/matloob/go/src/DS_PA1/pa1/kv_impl.go:15
-DS_PA1/pa1.processRequest(0xc00034b740, 0x8d3360, 0xc000196078, 0xc00015c190, 0x3, 0x3)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:140 +0x18e fp=0xc00034fe58 sp=0xc00034fd68 pc=0x76aeae
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc000196078)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:131 +0x139 fp=0xc00034ffc8 sp=0xc00034fe58 pc=0x76ab09
+goroutine 101 [running]:
+runtime.throw(0x84e008, 0x21)
+	/usr/local/go/src/runtime/panic.go:617 +0x72 fp=0xc000187cf8 sp=0xc000187cc8 pc=0x42f0d2
+runtime.mapaccess2_faststr(0x7cb400, 0xc0002f8ed0, 0xc0004004b8, 0x8, 0x9, 0x10)
+	/usr/local/go/src/runtime/map_faststr.go:116 +0x4a9 fp=0xc000187d68 sp=0xc000187cf8 pc=0x4143e9
+DS_PA1/pa1.get(...)
+	/home/matloob/go/src/DS_PA1/pa1/kv_impl.go:20
+DS_PA1/pa1.processRequest(0xc0002f8db0, 0x8d3320, 0xc00010c030, 0xc0003520f0, 0x2, 0x2)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:146 +0x31b fp=0xc000187e58 sp=0xc000187d68 pc=0x76b02b
+DS_PA1/pa1.readFromClient(0xc0002f8db0, 0x8d3320, 0xc00010c030)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:134 +0x139 fp=0xc000187fc8 sp=0xc000187e58 pc=0x76aaf9
 runtime.goexit()
-	/usr/local/go/src/runtime/asm_amd64.s:1337 +0x1 fp=0xc00034ffd0 sp=0xc00034ffc8 pc=0x45d7d1
+	/usr/local/go/src/runtime/asm_amd64.s:1337 +0x1 fp=0xc000187fd0 sp=0xc000187fc8 pc=0x45d7d1
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:111 +0x26f
 
 goroutine 1 [chan receive]:
-testing.(*T).Run(0xc0000f2100, 0x8431de, 0xa, 0x85c910, 0x47b501)
+testing.(*T).Run(0xc00013c100, 0x843194, 0xa, 0x85c8c8, 0x47b501)
 	/usr/local/go/src/testing/testing.go:917 +0x381
-testing.runTests.func1(0xc00013e000)
+testing.runTests.func1(0xc00013c000)
 	/usr/local/go/src/testing/testing.go:1157 +0x78
-testing.tRunner(0xc00013e000, 0xc00009fe30)
+testing.tRunner(0xc00013c000, 0xc00009fe30)
 	/usr/local/go/src/testing/testing.go:865 +0xc0
-testing.runTests(0xc0000fc060, 0xb831a0, 0xe, 0xe, 0x0)
+testing.runTests(0xc00010e080, 0xb831a0, 0xe, 0xe, 0x0)
 	/usr/local/go/src/testing/testing.go:1155 +0x2a9
-testing.(*M).Run(0xc000120000, 0x0)
+testing.(*M).Run(0xc000122000, 0x0)
 	/usr/local/go/src/testing/testing.go:1072 +0x162
 main.main()
 	_testmain.go:68 +0x13e
 
-goroutine 71 [select]:
-DS_PA1/pa1.(*testSystem).runTest(0xc0000fb0e0, 0x5dc, 0x2710, 0xc0001b7c70, 0xa, 0xa, 0xba8268, 0x0, 0x0, 0x0, ...)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:232 +0x636
-DS_PA1/pa1.testBasic(0xc0000f2100, 0x8431de, 0xa, 0xa, 0x5dc, 0x2710)
+goroutine 62 [runnable]:
+syscall.Syscall(0x1, 0x5, 0xc0000149f0, 0xd, 0xd, 0xd, 0x0)
+	/usr/local/go/src/syscall/asm_linux_amd64.s:18 +0x5
+syscall.write(0x5, 0xc0000149f0, 0xd, 0x10, 0x0, 0x100000000000003, 0x0)
+	/usr/local/go/src/syscall/zsyscall_linux_amd64.go:1005 +0x5a
+syscall.Write(...)
+	/usr/local/go/src/syscall/syscall_unix.go:191
+internal/poll.(*FD).Write(0xc00018e200, 0xc0000149f0, 0xd, 0x10, 0x0, 0x0, 0x0)
+	/usr/local/go/src/internal/poll/fd_unix.go:268 +0x179
+net.(*netFD).Write(0xc00018e200, 0xc0000149f0, 0xd, 0x10, 0xc0000149e0, 0xd, 0x10)
+	/usr/local/go/src/net/fd_unix.go:220 +0x4f
+net.(*conn).Write(0xc00010c010, 0xc0000149f0, 0xd, 0x10, 0x0, 0x0, 0x0)
+	/usr/local/go/src/net/net.go:189 +0x69
+DS_PA1/pa1.(*testSystem).runTest(0xc0002f8d80, 0x2ee, 0x2710, 0xc0002f8f00, 0x5, 0x5, 0xba8268, 0x0, 0x0, 0x0, ...)
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:310 +0xfc3
+DS_PA1/pa1.testBasic(0xc00013c100, 0x843194, 0xa, 0x5, 0x2ee, 0x2710)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:545 +0x565
-DS_PA1/pa1.TestBasic6(0xc0000f2100)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:676 +0x5b
-testing.tRunner(0xc0000f2100, 0x85c910)
+DS_PA1/pa1.TestBasic5(0xc00013c100)
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:672 +0x5b
+testing.tRunner(0xc00013c100, 0x85c8c8)
 	/usr/local/go/src/testing/testing.go:865 +0xc0
 created by testing.(*T).Run
 	/usr/local/go/src/testing/testing.go:916 +0x35a
 
-goroutine 73 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb19249fe8, 0x72, 0x0)
+goroutine 64 [IO wait]:
+internal/poll.runtime_pollWait(0x7fe6d41e6ed8, 0x72, 0x0)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc000110218, 0x72, 0x0, 0x0, 0x840fca)
+internal/poll.(*pollDesc).wait(0xc00018e118, 0x72, 0x0, 0x0, 0x840f8a)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Accept(0xc000110200, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Accept(0xc00018e100, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:384 +0x1ba
-net.(*netFD).accept(0xc000110200, 0xc000196001, 0x0, 0x0)
+net.(*netFD).accept(0xc00018e100, 0xc00010c001, 0x0, 0x0)
 	/usr/local/go/src/net/fd_unix.go:238 +0x42
-net.(*TCPListener).accept(0xc000100040, 0xc000064ae0, 0xc0001aefa8, 0x1)
+net.(*TCPListener).accept(0xc000192010, 0xc0000f4300, 0xc00003cfa8, 0x1)
 	/usr/local/go/src/net/tcpsock_posix.go:139 +0x32
-net.(*TCPListener).Accept(0xc000100040, 0xc0001aefa8, 0xc0001960d0, 0x0, 0x0)
+net.(*TCPListener).Accept(0xc000192010, 0xc00003cfa8, 0xc00010c088, 0x0, 0x0)
 	/usr/local/go/src/net/tcpsock.go:260 +0x48
-DS_PA1/pa1.acceptClients(0xc00034b740)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:90 +0x62
+DS_PA1/pa1.acceptClients(0xc0002f8db0)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:94 +0x63
 created by DS_PA1/pa1.(*keyValueServer).StartModel1
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:43 +0x1c9
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:47 +0x1ca
 
-goroutine 7 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000114100, 0x8d3360, 0xc000196000)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
+goroutine 100 [runnable]:
+syscall.Syscall(0x1, 0x6, 0xc00043c480, 0x10, 0x10, 0x10, 0x0)
+	/usr/local/go/src/syscall/asm_linux_amd64.s:18 +0x5
+syscall.write(0x6, 0xc00043c480, 0x10, 0x10, 0x0, 0x415195, 0xc000036600)
+	/usr/local/go/src/syscall/zsyscall_linux_amd64.go:1005 +0x5a
+syscall.Write(...)
+	/usr/local/go/src/syscall/syscall_unix.go:191
+internal/poll.(*FD).Write(0xc00018e280, 0xc00043c480, 0x10, 0x10, 0x0, 0x0, 0x0)
+	/usr/local/go/src/internal/poll/fd_unix.go:268 +0x179
+net.(*netFD).Write(0xc00018e280, 0xc00043c480, 0x10, 0x10, 0xb83020, 0xc000088750, 0xc0000366c0)
+	/usr/local/go/src/net/fd_unix.go:220 +0x4f
+net.(*conn).Write(0xc000192028, 0xc00043c480, 0x10, 0x10, 0x0, 0x0, 0x0)
+	/usr/local/go/src/net/net.go:189 +0x69
+DS_PA1/pa1.writeToClient(0xc0002f8db0, 0x8d3320, 0xc000192028)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:157 +0x8f
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
 
-goroutine 52 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc0002ca2c0, 0x8d3360, 0xc00010e038)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
+goroutine 35 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0000f6390, 0x8d3320, 0xc000192000)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
 
-goroutine 35 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc0000fc200, 0xc0001aa000)
+goroutine 7 [chan send]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc00010e220, 0xc00007c180)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 51 [chan send]:
-DS_PA1/pa1.readFromClient(0xc0002ca2c0, 0x8d3360, 0xc00010e038)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:126 +0x20b
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 30 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000114580, 0x8d3360, 0xc0001000a0)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 38 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc0000fc2e0, 0xc0001aa0c0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 44 [chan send]:
-DS_PA1/pa1.readFromClient(0xc0002c7600, 0x8d3360, 0xc000196010)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:126 +0x20b
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 111 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e700)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 54 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc0002ca2c0, 0x8d3360, 0xc0001000b8)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 79 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc000196040)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 11 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00010c140, 0xc00007c180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 12 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00010c160, 0xc00007c180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 45 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc0002c7600, 0x8d3360, 0xc000196010)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 78 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249b08, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4418, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4400, 0xc0001a1000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4400, 0xc0001a1000, 0x1000, 0x1000, 0xc0002a8e30, 0xc0002a8d10, 0x3)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196040, 0xc0001a1000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc0002a8f60)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc0002a8f60, 0xa, 0xc, 0xa0000000000000e, 0x12, 0x20, 0x9)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc0002a8f60, 0x8d330a, 0xc000196040, 0xc0004d3590, 0x2, 0x2, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-bufio.(*Reader).ReadString(...)
-	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc000196040)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 47 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc0002c7600, 0x8d3360, 0xc000010540)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 82 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000eb00, 0xc00013c2a0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 83 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000eb20, 0xc00013c2a0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 62 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000408140, 0x8d3360, 0xc000196030)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 64 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000408140, 0x8d3360, 0xc00010e040)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 114 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000408140, 0x8d3360, 0xc00010e058)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 109 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e6c0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 116 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000408140, 0x8d3360, 0xc00010e060)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 110 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e6e0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 118 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc000408140, 0x8d3360, 0xc000100038)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 76 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249968, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc000110318, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc000110300, 0xc0002f3000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc000110300, 0xc0002f3000, 0x1000, 0x1000, 0xc00034de30, 0xc00034dd10, 0x3)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000100050, 0xc0002f3000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc00034df60)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc00034df60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc00034df60, 0x8d330a, 0xc000100050, 0xc0004d35c0, 0x2, 0x2, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-bufio.(*Reader).ReadString(...)
-	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc000100050)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 77 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc000100050)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 74 [runnable]:
-DS_PA1/pa1.handleConnections(0xc00034b740)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:104 +0xfe
+goroutine 65 [runnable]:
+DS_PA1/pa1.handleConnections(0xc0002f8db0)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0xfe
 created by DS_PA1/pa1.(*keyValueServer).StartModel1
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:44 +0x1ee
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:48 +0x1ef
 
-goroutine 104 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e620, 0xc0001aa060)
+goroutine 10 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc000190090, 0x8d3320, 0xc00010c070)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
+
+goroutine 37 [chan send]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa060, 0xc000210000)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 105 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e640, 0xc0001aa060)
+goroutine 102 [runnable]:
+DS_PA1/pa1.writeToClient(0xc0002f8db0, 0x8d3320, 0xc00010c030)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
+
+goroutine 40 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002c7200, 0x8d3320, 0xc00010c078)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
+
+goroutine 42 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002c7200, 0x8d3320, 0xc00010c080)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
+
+goroutine 99 [IO wait]:
+internal/poll.runtime_pollWait(0x7fe6d41e6c68, 0x72, 0xffffffffffffffff)
+	/usr/local/go/src/runtime/netpoll.go:182 +0x56
+internal/poll.(*pollDesc).wait(0xc00018e298, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc00018e280, 0xc000218000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
+net.(*netFD).Read(0xc00018e280, 0xc000218000, 0x1000, 0x1000, 0xc000186e30, 0x0, 0x403c24)
+	/usr/local/go/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc000192028, 0xc000218000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/usr/local/go/src/net/net.go:177 +0x69
+bufio.(*Reader).fill(0xc000186f60)
+	/usr/local/go/src/bufio/bufio.go:100 +0x10f
+bufio.(*Reader).ReadSlice(0xc000186f60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
+	/usr/local/go/src/bufio/bufio.go:356 +0x3d
+bufio.(*Reader).ReadBytes(0xc000186f60, 0x8d330a, 0xc000192028, 0xc0003eaa20, 0x2, 0x2, 0x0)
+	/usr/local/go/src/bufio/bufio.go:434 +0x70
+bufio.(*Reader).ReadString(...)
+	/usr/local/go/src/bufio/bufio.go:474
+DS_PA1/pa1.readFromClient(0xc0002f8db0, 0x8d3320, 0xc000192028)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:126 +0x150
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:111 +0x26f
+
+goroutine 13 [chan send]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa160, 0xc00007c240)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 106 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e660, 0xc0001aa060)
+goroutine 14 [chan send]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa180, 0xc00007c240)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 107 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e680, 0xc0001aa060)
+goroutine 16 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002f8630, 0x8d3320, 0xc000104028)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
+
+goroutine 66 [chan send]:
+DS_PA1/pa1.readFromClient(0xc0002f8630, 0x8d3320, 0xc00010c0b0)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:129 +0x20b
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:111 +0x26f
+
+goroutine 67 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002f8630, 0x8d3320, 0xc00010c0b0)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
+created by DS_PA1/pa1.handleConnections
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
+
+goroutine 32 [chan send]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc00010e320, 0xc00013a2a0)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 108 [chan send]:
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e6a0, 0xc0001aa060)
+goroutine 33 [chan send]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc00010e340, 0xc00013a2a0)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:145 +0x205
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 80 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249ca8, 0x72, 0xffffffffffffffff)
+goroutine 103 [IO wait]:
+internal/poll.runtime_pollWait(0x7fe6d41e69f8, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4498, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc000122618, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4480, 0xc00011f000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc000122600, 0xc000300000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4480, 0xc00011f000, 0x1000, 0x1000, 0xc00034ce30, 0xc00034cd10, 0x3)
+net.(*netFD).Read(0xc000122600, 0xc000300000, 0x1000, 0x1000, 0xc00004fe30, 0x0, 0x403c24)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196048, 0xc00011f000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c038, 0xc000300000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc00034cf60)
+bufio.(*Reader).fill(0xc00004ff60)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc00034cf60, 0xa, 0xc, 0xa0000000000000e, 0x12, 0x20, 0x9)
+bufio.(*Reader).ReadSlice(0xc00004ff60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc00034cf60, 0x8d330a, 0xc000196048, 0xc0004d3560, 0x2, 0x2, 0x0)
+bufio.(*Reader).ReadBytes(0xc00004ff60, 0x8d330a, 0xc00010c038, 0xc0002f9bc0, 0x2, 0x2, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
 bufio.(*Reader).ReadString(...)
 	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc000196048)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
+DS_PA1/pa1.readFromClient(0xc0002f8db0, 0x8d3320, 0xc00010c038)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:126 +0x150
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:111 +0x26f
 
-goroutine 81 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc000196048)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
+goroutine 104 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002f8db0, 0x8d3320, 0xc00010c038)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
 
-goroutine 130 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249d78, 0x72, 0xffffffffffffffff)
+goroutine 105 [IO wait]:
+internal/poll.runtime_pollWait(0x7fe6d41e6788, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4618, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc000122798, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4600, 0xc000306000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc000122780, 0xc00020a000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4600, 0xc000306000, 0x1000, 0x1000, 0xc00018ae30, 0xc00018ad10, 0x3)
+net.(*netFD).Read(0xc000122780, 0xc00020a000, 0x1000, 0x1000, 0xc000313e30, 0x0, 0x403c24)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196070, 0xc000306000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c068, 0xc00020a000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc00018af60)
+bufio.(*Reader).fill(0xc000313f60)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc00018af60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
+bufio.(*Reader).ReadSlice(0xc000313f60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc00018af60, 0x8d330a, 0xc000196070, 0xc0004d3530, 0x2, 0x2, 0x0)
+bufio.(*Reader).ReadBytes(0xc000313f60, 0x8d330a, 0xc00010c068, 0xc0003702d0, 0x2, 0x2, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
 bufio.(*Reader).ReadString(...)
 	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc000196070)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
+DS_PA1/pa1.readFromClient(0xc0002f8db0, 0x8d3320, 0xc00010c068)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:126 +0x150
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:111 +0x26f
 
-goroutine 131 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc000196070)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
+goroutine 106 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002f8db0, 0x8d3320, 0xc00010c068)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
 
-goroutine 133 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc000196078)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 134 [runnable]:
-DS_PA1/pa1.processRequest(0xc00034b740, 0x8d3360, 0xc00010e018, 0xc0003bc410, 0x3, 0x3)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:137 +0xcc
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc00010e018)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:131 +0x139
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 135 [runnable]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc00010e018)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 136 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb19249488, 0x72, 0xffffffffffffffff)
+goroutine 107 [IO wait]:
+internal/poll.runtime_pollWait(0x7fe6d41e66b8, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc000192498, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc000122818, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc000192480, 0xc0003e7000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc000122800, 0xc0002c0000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc000192480, 0xc0003e7000, 0x1000, 0x1000, 0xc000351e30, 0x0, 0x403c24)
+net.(*netFD).Read(0xc000122800, 0xc0002c0000, 0x1000, 0x1000, 0xc000049e30, 0x0, 0x403c24)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc00010e030, 0xc0003e7000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c088, 0xc0002c0000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000351f60)
+bufio.(*Reader).fill(0xc000049f60)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000351f60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
+bufio.(*Reader).ReadSlice(0xc000049f60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000351f60, 0x8d330a, 0xc00010e030, 0xc0004d34a0, 0x2, 0x2, 0x0)
+bufio.(*Reader).ReadBytes(0xc000049f60, 0x8d330a, 0xc00010c088, 0xc000371590, 0x2, 0x2, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
 bufio.(*Reader).ReadString(...)
 	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc00010e030)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
+DS_PA1/pa1.readFromClient(0xc0002f8db0, 0x8d3320, 0xc00010c088)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:126 +0x150
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:111 +0x26f
 
-goroutine 137 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc00010e030)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
+goroutine 108 [chan receive]:
+DS_PA1/pa1.writeToClient(0xc0002f8db0, 0x8d3320, 0xc00010c088)
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x152
 created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
+	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:112 +0x2a8
 
-goroutine 138 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb192492e8, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc000192518, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc000192500, 0xc00040b000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc000192500, 0xc00040b000, 0x1000, 0x1000, 0x10000000040d589, 0xc0004d41e0, 0x8)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc00010e050, 0xc00040b000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc0002aaf60)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc0002aaf60, 0xa, 0x8, 0xa00000000000015, 0xc0002aade8, 0x444dac, 0x50)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc0002aaf60, 0x8d330a, 0xc00010e050, 0xc00015c140, 0x3, 0x3, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-bufio.(*Reader).ReadString(...)
-	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc00010e050)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
+goroutine 83 [runnable]:
+DS_PA1/pa1.(*testSystem).startWriting.func1(0x2ee, 0xc0002100c0, 0xc0001fa060)
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:173 +0xa5
+created by DS_PA1/pa1.(*testSystem).startWriting
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
 
-goroutine 139 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc00010e050)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 140 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249148, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc000192598, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc000192580, 0xc00041c000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc000192580, 0xc00041c000, 0x1000, 0x1000, 0xc000353e30, 0xc000353d10, 0x3)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc00010e068, 0xc00041c000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000353f60)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000353f60, 0xa, 0xc, 0xa0000000000000e, 0x12, 0x20, 0x9)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000353f60, 0x8d330a, 0xc00010e068, 0xc0004d35f0, 0x2, 0x2, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-bufio.(*Reader).ReadString(...)
-	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc00010e068)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 141 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc00010e068)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 142 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb192508f8, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4998, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4980, 0xc00041d000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4980, 0xc00041d000, 0x1000, 0x1000, 0xc00018de30, 0x0, 0x403c24)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc0001960d0, 0xc00041d000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc00018df60)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc00018df60, 0xa, 0xc, 0xa0000000000000d, 0x11, 0x20, 0x8)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc00018df60, 0x8d330a, 0xc0001960d0, 0xc0004d21e0, 0x2, 0x2, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-bufio.(*Reader).ReadString(...)
-	/usr/local/go/src/bufio/bufio.go:474
-DS_PA1/pa1.readFromClient(0xc00034b740, 0x8d3360, 0xc0001960d0)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:123 +0x150
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:108 +0x278
-
-goroutine 143 [chan receive]:
-DS_PA1/pa1.writeToClient(0xc00034b740, 0x8d3360, 0xc0001960d0)
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:154 +0x153
-created by DS_PA1/pa1.handleConnections
-	/home/matloob/go/src/DS_PA1/pa1/server_impl.go:109 +0x2b1
-
-goroutine 112 [sleep]:
+goroutine 84 [sleep]:
 runtime.goparkunlock(...)
 	/usr/local/go/src/runtime/proc.go:307
 time.Sleep(0x5f5e100)
 	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e720)
+DS_PA1/pa1.(*testSystem).startWriting.func1(0x2ee, 0xc0002100c0, 0xc0001fa080)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
 created by DS_PA1/pa1.(*testSystem).startWriting
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
 
-goroutine 113 [sleep]:
+goroutine 85 [runnable]:
+DS_PA1/pa1.(*testSystem).startWriting.func1(0x2ee, 0xc0002100c0, 0xc0001fa0a0)
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:173 +0xa5
+created by DS_PA1/pa1.(*testSystem).startWriting
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
+
+goroutine 86 [sleep]:
 runtime.goparkunlock(...)
 	/usr/local/go/src/runtime/proc.go:307
 time.Sleep(0x5f5e100)
 	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e740)
+DS_PA1/pa1.(*testSystem).startWriting.func1(0x2ee, 0xc0002100c0, 0xc0001fa0c0)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
 created by DS_PA1/pa1.(*testSystem).startWriting
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
 
-goroutine 146 [sleep]:
+goroutine 87 [sleep]:
 runtime.goparkunlock(...)
 	/usr/local/go/src/runtime/proc.go:307
 time.Sleep(0x5f5e100)
 	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e760)
+DS_PA1/pa1.(*testSystem).startWriting.func1(0x2ee, 0xc0002100c0, 0xc0001fa0e0)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
 created by DS_PA1/pa1.(*testSystem).startWriting
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
 
-goroutine 147 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e780)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 148 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e7c0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 149 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e7e0)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 150 [sleep]:
-runtime.goparkunlock(...)
-	/usr/local/go/src/runtime/proc.go:307
-time.Sleep(0x5f5e100)
-	/usr/local/go/src/runtime/time.go:105 +0x159
-DS_PA1/pa1.(*testSystem).startWriting.func1(0x5dc, 0xc0001aa1e0, 0xc00000e820)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:180 +0xc9
-created by DS_PA1/pa1.(*testSystem).startWriting
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:168 +0x60
-
-goroutine 151 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb192497c8, 0x72, 0xffffffffffffffff)
+goroutine 88 [runnable]:
+internal/poll.runtime_pollWait(0x7fe6d41e6e08, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc000110298, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc00018e218, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc000110280, 0xc000453000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc00018e200, 0xc0002c8000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc000110280, 0xc000453000, 0x1000, 0x1000, 0x40d589, 0xc0001672c0, 0x10)
+net.(*netFD).Read(0xc00018e200, 0xc0002c8000, 0x1000, 0x1000, 0x40d589, 0xc000490600, 0x10)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196008, 0xc000453000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c010, 0xc0002c8000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000293f68)
+bufio.(*Reader).fill(0xc00004af68)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000293f68, 0xc0001aa10a, 0xc000065620, 0xc000293f08, 0xc000293e30, 0x3, 0x0)
+bufio.(*Reader).ReadSlice(0xc00004af68, 0xc00021000a, 0xc0000fea20, 0xc00004af08, 0xc00004ae30, 0x3, 0x0)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000293f68, 0xc000293f0a, 0x11, 0x11, 0xc0002653a0, 0x11, 0x0)
+bufio.(*Reader).ReadBytes(0xc00004af68, 0xc00004af0a, 0x10, 0x10, 0xc000490610, 0x10, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e6c0, 0xc0001aa180)
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa060, 0xc000210060)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 152 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb19249a38, 0x72, 0xffffffffffffffff)
+goroutine 89 [runnable]:
+internal/poll.runtime_pollWait(0x7fe6d41e6d38, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4198, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc000122118, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4180, 0xc000456000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc000122100, 0xc0002c9000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4180, 0xc000456000, 0x1000, 0x1000, 0x40d589, 0xc000167140, 0x10)
+net.(*netFD).Read(0xc000122100, 0xc0002c9000, 0x1000, 0x1000, 0x40d589, 0x0, 0x0)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196028, 0xc000456000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c020, 0xc0002c9000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000292f68)
+bufio.(*Reader).fill(0xc00004ef68)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000292f68, 0xc0001aa10a, 0xc000065620, 0xc000292f08, 0xc000292e30, 0x3, 0x0)
+bufio.(*Reader).ReadSlice(0xc00004ef68, 0xc0000ff00a, 0xc0002100b8, 0x10000c0003c160e, 0x3, 0x11, 0x0)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000292f68, 0xc000292f0a, 0x11, 0x11, 0xc0002421e0, 0x11, 0x0)
+bufio.(*Reader).ReadBytes(0xc00004ef68, 0xc00004ef0a, 0x11, 0x11, 0xc0003c4ea0, 0x11, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e6e0, 0xc0001aa180)
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa080, 0xc000210060)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 153 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb19249898, 0x72, 0xffffffffffffffff)
+goroutine 90 [runnable]:
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa0a0, 0xc000210060)
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:150 +0xc6
+created by DS_PA1/pa1.(*testSystem).startReading
+	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
+
+goroutine 91 [runnable]:
+internal/poll.runtime_pollWait(0x7fe6d41e6928, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4218, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc000122698, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4200, 0xc000457000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc000122680, 0xc0002ed000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4200, 0xc000457000, 0x1000, 0x1000, 0x40d589, 0xc000166fb0, 0x10)
+net.(*netFD).Read(0xc000122680, 0xc0002ed000, 0x1000, 0x1000, 0x40d589, 0x0, 0x0)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196050, 0xc000457000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c058, 0xc0002ed000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000352f68)
+bufio.(*Reader).fill(0xc0001a6768)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000352f68, 0xc0001aa10a, 0xc000065620, 0xc000352f08, 0xc000352e30, 0x3, 0x0)
+bufio.(*Reader).ReadSlice(0xc0001a6768, 0xc00021000a, 0xc0000fea20, 0xc0001a6708, 0xc0001a6630, 0x3, 0x0)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000352f68, 0xc000352f0a, 0x11, 0x11, 0xc00021b020, 0x11, 0x0)
+bufio.(*Reader).ReadBytes(0xc0001a6768, 0xc0001a670a, 0x11, 0x11, 0xc0003afca0, 0x11, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e700, 0xc0001aa180)
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa0c0, 0xc000210060)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 
-goroutine 154 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249bd8, 0x72, 0xffffffffffffffff)
+goroutine 92 [runnable]:
+internal/poll.runtime_pollWait(0x7fe6d41e6858, 0x72, 0xffffffffffffffff)
 	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4518, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+internal/poll.(*pollDesc).wait(0xc000122718, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
 internal/poll.(*pollDesc).waitRead(...)
 	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4500, 0xc000460000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+internal/poll.(*FD).Read(0xc000122700, 0xc0002c1000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4500, 0xc000460000, 0x1000, 0x1000, 0x40d589, 0xc0004d00c0, 0x20)
+net.(*netFD).Read(0xc000122700, 0xc0002c1000, 0x1000, 0x1000, 0x40d589, 0x0, 0x0)
 	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196060, 0xc000460000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+net.(*conn).Read(0xc00010c098, 0xc0002c1000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
 	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc00028af68)
+bufio.(*Reader).fill(0xc00004df68)
 	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc00028af68, 0xc0001aa10a, 0xc000065620, 0xc00028af08, 0xc00028ae30, 0x3, 0x0)
+bufio.(*Reader).ReadSlice(0xc00004df68, 0xc0000ff00a, 0xc0002100b8, 0x10000c0003a160e, 0x3, 0x11, 0x0)
 	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc00028af68, 0xc00028af0a, 0x12, 0x12, 0xc0004d00e0, 0x12, 0x0)
+bufio.(*Reader).ReadBytes(0xc00004df68, 0xc00004df0a, 0x11, 0x11, 0xc0003aec20, 0x11, 0x0)
 	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e720, 0xc0001aa180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 155 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249e48, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4598, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4580, 0xc000461000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4580, 0xc000461000, 0x1000, 0x1000, 0x40d589, 0xc0004c0bc0, 0x20)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196080, 0xc000461000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc00028b768)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc00028b768, 0xc0001a440a, 0xc0001aa1d8, 0x10000c0004c160e, 0x3, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc00028b768, 0xc00028b70a, 0x11, 0x11, 0xc0004c0be0, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e740, 0xc0001aa180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 156 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb192496f8, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4718, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4700, 0xc000478000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4700, 0xc000478000, 0x1000, 0x1000, 0x40d589, 0xc000167440, 0x10)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc000196090, 0xc000478000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000294f68)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000294f68, 0xc0001aa10a, 0xc000065620, 0xc000294f08, 0xc000294e30, 0x3, 0x0)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000294f68, 0xc000294f0a, 0x11, 0x11, 0xc0002d0560, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e760, 0xc0001aa180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 157 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb19249558, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4798, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4780, 0xc000479000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4780, 0xc000479000, 0x1000, 0x1000, 0x40d589, 0xc0004afa00, 0x20)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc0001960a0, 0xc000479000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000254768)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000254768, 0xc0001a420a, 0xc0001aa1d8, 0x10000c0004a160e, 0x3, 0x12, 0x0)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000254768, 0xc00025470a, 0x12, 0x12, 0xc0004afa20, 0x12, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e780, 0xc0001aa180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 158 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb192493b8, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4818, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4800, 0xc000482000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4800, 0xc000482000, 0x1000, 0x1000, 0x40d589, 0xc000506540, 0x20)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc0001960b0, 0xc000482000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000284f68)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000284f68, 0xc0001aa10a, 0xc000065620, 0xc000284f08, 0xc000284e30, 0x3, 0x0)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000284f68, 0xc000284f0a, 0x11, 0x11, 0xc000506560, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e7c0, 0xc0001aa180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 159 [IO wait]:
-internal/poll.runtime_pollWait(0x7fbb19249218, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4898, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4880, 0xc000483000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4880, 0xc000483000, 0x1000, 0x1000, 0x40d589, 0xc0004f5320, 0x20)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc0001960c0, 0xc000483000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000285768)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000285768, 0xc0001aa10a, 0xc000065620, 0xc000285708, 0xc000285630, 0x3, 0x0)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000285768, 0xc00028570a, 0x11, 0x11, 0xc0004f5340, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e7e0, 0xc0001aa180)
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
-created by DS_PA1/pa1.(*testSystem).startReading
-	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
-
-goroutine 160 [runnable]:
-internal/poll.runtime_pollWait(0x7fbb192509c8, 0x72, 0xffffffffffffffff)
-	/usr/local/go/src/runtime/netpoll.go:182 +0x56
-internal/poll.(*pollDesc).wait(0xc0000f4918, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:87 +0x9b
-internal/poll.(*pollDesc).waitRead(...)
-	/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
-internal/poll.(*FD).Read(0xc0000f4900, 0xc000452000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/internal/poll/fd_unix.go:169 +0x19b
-net.(*netFD).Read(0xc0000f4900, 0xc000452000, 0x1000, 0x1000, 0x40d589, 0xc0004e2540, 0x20)
-	/usr/local/go/src/net/fd_unix.go:202 +0x4f
-net.(*conn).Read(0xc00010e070, 0xc000452000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
-	/usr/local/go/src/net/net.go:177 +0x69
-bufio.(*Reader).fill(0xc000285f68)
-	/usr/local/go/src/bufio/bufio.go:100 +0x10f
-bufio.(*Reader).ReadSlice(0xc000285f68, 0xc0001a460a, 0xc0001aa1d8, 0x10000c0004e160e, 0x3, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:356 +0x3d
-bufio.(*Reader).ReadBytes(0xc000285f68, 0xc000285f0a, 0x11, 0x11, 0xc0004e2560, 0x11, 0x0)
-	/usr/local/go/src/bufio/bufio.go:434 +0x70
-DS_PA1/pa1.(*testSystem).startReading.func1(0xc00000e820, 0xc0001aa180)
+DS_PA1/pa1.(*testSystem).startReading.func1(0xc0001fa0e0, 0xc000210060)
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:143 +0xd9
 created by DS_PA1/pa1.(*testSystem).startReading
 	/home/matloob/go/src/DS_PA1/pa1/server_test.go:139 +0x56
 exit status 2
-FAIL	DS_PA1/pa1	7.234s
+FAIL	DS_PA1/pa1	5.993s
