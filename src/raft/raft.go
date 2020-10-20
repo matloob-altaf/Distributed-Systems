@@ -19,7 +19,9 @@ package raft
 
 import (
 	"labrpc"
+	"math/rand"
 	"sync"
+	"time"
 )
 
 // import "bytes"
@@ -33,8 +35,8 @@ import (
 type ApplyMsg struct {
 	Index       int
 	Command     interface{}
-	UseSnapshot bool   // ignore for Assignment2; only used in Assignment3
-	Snapshot    []byte // ignore for Assignment2; only used in Assignment3
+	UseSnapshot bool   // ignore for lab2; only used in lab3
+	Snapshot    []byte // ignore for lab2; only used in lab3
 }
 
 //
@@ -46,20 +48,26 @@ type Raft struct {
 	persister *Persister
 	me        int // index into peers[]
 
-	// Your data here.
-	// Look at the paper's Figure 2 for a description of what
-	// state a Raft server must maintain.
+	id              string
+	state           string
+	isDecommisioned bool
 
+	currentTerm int
+	votedFor    string // Id of candidate that has voted for, this term. Empty string if no vote has been cast.
+	leaderID    string
+
+	lastHeartBeat time.Time
+	lastEntrySent time.Time
+
+	// TODO: Add log storage state
 }
 
-// return currentTerm and whether this server
+// GetState return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
-
-	var term int
-	var isleader bool
-	// Your code here.
-	return term, isleader
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	return rf.currentTerm, rf.state == "Leader"
 }
 
 //
@@ -68,7 +76,7 @@ func (rf *Raft) GetState() (int, bool) {
 // see paper's Figure 2 for a description of what should be persistent.
 //
 func (rf *Raft) persist() {
-	// Your code here.
+	// Your code here (2C).
 	// Example:
 	// w := new(bytes.Buffer)
 	// e := gob.NewEncoder(w)
@@ -82,55 +90,104 @@ func (rf *Raft) persist() {
 // restore previously persisted state.
 //
 func (rf *Raft) readPersist(data []byte) {
-	// Your code here.
+	// Your code here (2C).
 	// Example:
 	// r := bytes.NewBuffer(data)
 	// d := gob.NewDecoder(r)
 	// d.Decode(&rf.xxx)
 	// d.Decode(&rf.yyy)
+	if data == nil || len(data) < 1 { // bootstrap without any state?
+		return
+	}
 }
 
-//
-// example RequestVote RPC arguments structure.
-//
+// RequestVoteArgs -
 type RequestVoteArgs struct {
-	// Your data here.
+	Term        int
+	CandidateID string
+	// lastLogIndex int
+	// lastLogTerm  int
+	// TODO: Last log index/term
 }
 
-//
-// example RequestVote RPC reply structure.
-//
+// RequestVoteReply -
 type RequestVoteReply struct {
-	// Your data here.
+	Term        int
+	VoteGranted bool
 }
 
-//
-// example RequestVote RPC handler.
-//
-func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
-	// Your code here.
+// RequestVote -
+func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	if args.Term < rf.currentTerm {
+		reply.VoteGranted = false
+	} else if args.Term > rf.currentTerm {
+		reply.VoteGranted = true
+		rf.currentTerm = args.Term
+		rf.state = "Follower"
+		rf.votedFor = args.CandidateID
+	} else if rf.votedFor == "" || args.CandidateID == rf.votedFor {
+		// TODO: Ensure candidates log is at least as up-to-date as our log
+		reply.VoteGranted = true
+		rf.votedFor = args.CandidateID
+	}
+	reply.Term = rf.currentTerm
+
+	DPrintf("Raft: [Id: %s | Term: %d | %v] - Vote requested for: %s on term: %d. Vote granted? %v", rf.id, rf.currentTerm, rf.state, args.CandidateID, args.Term, reply.VoteGranted)
 }
 
-//
-// example code to send a RequestVote RPC to a server.
-// server is the index of the target server in rf.peers[].
-// expects RPC arguments in args.
-// fills in *reply with RPC reply, so caller should
-// pass &reply.
-// the types of the args and reply passed to Call() must be
-// the same as the types of the arguments declared in the
-// handler function (including whether they are pointers).
-//
-// returns true if labrpc says the RPC was delivered.
-//
-// if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in structs passed over RPC, and
-// that the caller passes the address of the reply struct with &, not
-// the struct itself.
-//
-func (rf *Raft) sendRequestVote(server int, args RequestVoteArgs, reply *RequestVoteReply) bool {
+func (rf *Raft) sendRequestVote(server int, voteChan chan int, args *RequestVoteArgs, reply *RequestVoteReply) {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	return ok
+	if !ok {
+		rf.mu.Lock()
+		DPrintf("Raft: [Id: %s | Term: %d | %v] - Communication error: RequestVote() RPC failed", rf.id, rf.currentTerm, rf.state)
+		rf.mu.Unlock()
+	}
+	voteChan <- server
+}
+
+// --- AppendEntries RPC ---
+
+// AppendEntriesArgs - RPC arguments
+type AppendEntriesArgs struct {
+	Term     int
+	LeaderID string
+}
+
+// AppendEntriesReply - RPC response
+type AppendEntriesReply struct {
+	Term    int
+	Success bool
+}
+
+// AppendEntries - RPC function
+func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	if args.Term < rf.currentTerm {
+		reply.Success = false
+		return
+	} else if args.Term >= rf.currentTerm { // Become follower
+		rf.leaderID = args.LeaderID
+		rf.currentTerm = args.Term
+		rf.state = "Follower"
+		reply.Success = true
+		rf.votedFor = ""
+		rf.lastHeartBeat = time.Now()
+	}
+	reply.Term = rf.currentTerm
+}
+
+func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) {
+	ok := rf.peers[server].Call("Raft.AppendEntries", args, reply)
+	if !ok {
+		rf.mu.Lock()
+		DPrintf("Raft: [Id: %s | Term: %d | %v] - Communication error: AppendEntries() RPC failed", rf.id, rf.currentTerm, rf.state)
+		rf.mu.Unlock()
+	}
 }
 
 //
@@ -151,17 +208,9 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	term := -1
 	isLeader := true
 
-	return index, term, isLeader
-}
+	// Your code here (2B).
 
-//
-// the tester calls Kill() when a Raft instance won't
-// be needed again. you are not required to do anything
-// in Kill(), but it might be convenient to (for example)
-// turn off debug output from this instance.
-//
-func (rf *Raft) Kill() {
-	// Your code here, if desired.
+	return index, term, isLeader
 }
 
 //
@@ -177,15 +226,144 @@ func (rf *Raft) Kill() {
 //
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
-	rf := &Raft{}
-	rf.peers = peers
-	rf.persister = persister
-	rf.me = me
+	rf := &Raft{
+		peers:     peers,
+		persister: persister,
+		me:        me,
+		id:        string(rune(me + 'A')),
+		state:     "Follower",
+	}
 
-	// Your initialization code here.
+	DPrintf("Raft: [Id: %s | Term: %d | %v] - Node created", rf.id, rf.currentTerm, rf.state)
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
+	go rf.electionTimer()
+
 	return rf
+}
+
+func electionTimeout() time.Duration {
+	return time.Duration(rand.Intn(600-300)+300) * time.Millisecond
+}
+
+func (rf *Raft) electionTimer() {
+	timeout := electionTimeout()
+	currentTime := <-time.After(timeout)
+
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	// Start election process if we're not a leader and the haven't recieved a heartbeat for `electionTimeout`
+	if rf.state != "Leader" && currentTime.Sub(rf.lastHeartBeat) >= timeout {
+		DPrintf("Raft: [Id: %s | Term: %d | %v] - Election timer timed out. Timeout: %fs", rf.id, rf.currentTerm, rf.state, timeout.Seconds())
+		go rf.startElection()
+	} else if !rf.isDecommisioned {
+		go rf.electionTimer()
+	}
+}
+
+func (rf *Raft) startElection() {
+	// Increment currentTerm and vote for self
+	rf.mu.Lock()
+	rf.state = "Candidate"
+	rf.currentTerm++
+	rf.votedFor = rf.id
+
+	DPrintf("Raft: [Id: %s | Term: %d | %v] - Election started", rf.id, rf.currentTerm, rf.state)
+
+	args := RequestVoteArgs{Term: rf.currentTerm, CandidateID: rf.id}
+	resps := make([]RequestVoteReply, len(rf.peers))
+
+	// Reset election timer in case of split vote / general unavailability
+	go rf.electionTimer()
+
+	// Request votes from peers
+	voteChan := make(chan int, len(rf.peers))
+	for i := range rf.peers {
+		if i != rf.me {
+			go rf.sendRequestVote(i, voteChan, &args, &resps[i])
+		}
+	}
+	rf.mu.Unlock()
+
+	votes := 1
+	for i := 0; i < len(resps); i++ {
+		respIndex := <-voteChan
+		if resps[respIndex].VoteGranted {
+			votes++
+		}
+		if votes > len(resps)/2 {
+			break // We can stop counting votes once we have majority
+		}
+	}
+
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	// Ensure that we're still a candidate and that another election did not start
+	if rf.state == "Candidate" && args.Term == rf.currentTerm {
+		DPrintf("Raft: [Id: %s | Term: %d | %v] - Election results. Vote: %d/%d", rf.id, rf.currentTerm, rf.state, votes, len(rf.peers))
+		// If majority vote, become leader
+		if votes > len(rf.peers)/2 {
+			rf.state = "Leader"
+			rf.leaderID = rf.id
+			go rf.heartbeatTimer()
+		}
+	} else {
+		DPrintf("Raft: [Id: %s | Term: %d | %v] - Election for term %d interrupted", rf.id, rf.currentTerm, rf.state, args.Term)
+	}
+}
+
+func (rf *Raft) sendHeartbeats() {
+	rf.mu.Lock()
+
+	// Heartbeat message
+	args := AppendEntriesArgs{Term: rf.currentTerm, LeaderID: rf.id}
+	resps := make([]AppendEntriesReply, len(rf.peers))
+
+	DPrintf("Raft: [Id: %s | Term: %d | %v] - Sending heartbeats to cluster", rf.id, rf.currentTerm, rf.state)
+
+	// Attempt to send heartbeats to all peers
+	for i := range rf.peers {
+		if i != rf.me {
+			go rf.sendAppendEntries(i, &args, &resps[i])
+		}
+	}
+	rf.lastEntrySent = time.Now()
+
+	rf.mu.Unlock()
+}
+
+func (rf *Raft) heartbeatTimer() {
+	rf.sendHeartbeats() // Send heartbeats to all peers as we've just become leader
+	for {
+		timeout := 300 * time.Millisecond
+		currentTime := <-time.After(timeout)
+
+		rf.mu.Lock()
+		shouldSendHeartbeats := rf.state == "Leader" && currentTime.Sub(rf.lastEntrySent) >= timeout
+		isDecomissioned := rf.isDecommisioned
+		rf.mu.Unlock()
+
+		// If we're leader and haven't had an entry for a while, then send liveness heartbeat
+		if _, isLeader := rf.GetState(); !isLeader || isDecomissioned {
+			break
+		} else if shouldSendHeartbeats {
+			rf.sendHeartbeats()
+		}
+	}
+}
+
+//
+// the tester calls Kill() when a Raft instance won't
+// be needed again. you are not required to do anything
+// in Kill(), but it might be convenient to (for example)
+// turn off debug output from this instance.
+//
+func (rf *Raft) Kill() {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	rf.isDecommisioned = true
+	DPrintf("Raft: [Id: %s | Term: %d | %v] - Node killed", rf.id, rf.currentTerm, rf.state)
 }
