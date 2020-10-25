@@ -48,13 +48,13 @@ type Raft struct {
 	persister *Persister
 	me        int // index into peers[]
 
-	id              string
-	state           string
-	isDecommisioned bool
+	id       int
+	state    string
+	isKilled bool
 
 	currentTerm int
-	votedFor    string // Id of candidate that has voted for, this term. Empty string if no vote has been cast.
-	leaderID    string
+	votedFor    int
+	leaderID    int
 
 	lastHeartBeat time.Time
 	lastEntrySent time.Time
@@ -65,9 +65,16 @@ type Raft struct {
 // GetState return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
+	var term int
+	var isleader bool
+	// Your code here.
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	return rf.currentTerm, rf.state == "Leader"
+
+	term = rf.currentTerm
+	isleader = (rf.state == "Leader")
+
+	rf.mu.Unlock()
+	return term, isleader
 }
 
 //
@@ -76,7 +83,7 @@ func (rf *Raft) GetState() (int, bool) {
 // see paper's Figure 2 for a description of what should be persistent.
 //
 func (rf *Raft) persist() {
-	// Your code here (2C).
+	// Your code here
 	// Example:
 	// w := new(bytes.Buffer)
 	// e := gob.NewEncoder(w)
@@ -90,13 +97,13 @@ func (rf *Raft) persist() {
 // restore previously persisted state.
 //
 func (rf *Raft) readPersist(data []byte) {
-	// Your code here (2C).
+	// Your code here
 	// Example:
 	// r := bytes.NewBuffer(data)
 	// d := gob.NewDecoder(r)
 	// d.Decode(&rf.xxx)
 	// d.Decode(&rf.yyy)
-	if data == nil || len(data) < 1 { // bootstrap without any state?
+	if data == nil {
 		return
 	}
 }
@@ -104,7 +111,7 @@ func (rf *Raft) readPersist(data []byte) {
 // RequestVoteArgs -
 type RequestVoteArgs struct {
 	Term        int
-	CandidateID string
+	CandidateID int
 	// lastLogIndex int
 	// lastLogTerm  int
 	// TODO: Last log index/term
@@ -119,41 +126,39 @@ type RequestVoteReply struct {
 // RequestVote -
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
 
 	if args.Term < rf.currentTerm {
 		reply.VoteGranted = false
 	} else if args.Term > rf.currentTerm {
 		reply.VoteGranted = true
-		rf.currentTerm = args.Term
 		rf.state = "Follower"
+		rf.currentTerm = args.Term
 		rf.votedFor = args.CandidateID
-	} else if rf.votedFor == "" || args.CandidateID == rf.votedFor {
+	} else if rf.votedFor == -1 || args.CandidateID == rf.votedFor {
 		// TODO: Ensure candidates log is at least as up-to-date as our log
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateID
 	}
 	reply.Term = rf.currentTerm
+	DPrintf("For server %d , term %d, state %s, case vote requested, for %d on term: %d. VoteGranted? %v", rf.id, rf.currentTerm, rf.state, args.CandidateID, args.Term, reply.VoteGranted)
 
-	DPrintf("Raft: [Id: %s | Term: %d | %v] - Vote requested for: %s on term: %d. Vote granted? %v", rf.id, rf.currentTerm, rf.state, args.CandidateID, args.Term, reply.VoteGranted)
+	rf.mu.Unlock()
 }
 
 func (rf *Raft) sendRequestVote(server int, voteChan chan int, args *RequestVoteArgs, reply *RequestVoteReply) {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	if !ok {
 		rf.mu.Lock()
-		DPrintf("Raft: [Id: %s | Term: %d | %v] - Communication error: RequestVote() RPC failed", rf.id, rf.currentTerm, rf.state)
+		DPrintf("For server %d , term %d, state %s, case RequestVote failed", rf.id, rf.currentTerm, rf.state)
 		rf.mu.Unlock()
 	}
 	voteChan <- server
 }
 
-// --- AppendEntries RPC ---
-
 // AppendEntriesArgs - RPC arguments
 type AppendEntriesArgs struct {
 	Term     int
-	LeaderID string
+	LeaderID int
 }
 
 // AppendEntriesReply - RPC response
@@ -171,11 +176,11 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		reply.Success = false
 		return
 	} else if args.Term >= rf.currentTerm { // Become follower
+		reply.Success = true
+		rf.state = "Follower"
+		rf.votedFor = -1
 		rf.leaderID = args.LeaderID
 		rf.currentTerm = args.Term
-		rf.state = "Follower"
-		reply.Success = true
-		rf.votedFor = ""
 		rf.lastHeartBeat = time.Now()
 	}
 	reply.Term = rf.currentTerm
@@ -185,7 +190,7 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 	ok := rf.peers[server].Call("Raft.AppendEntries", args, reply)
 	if !ok {
 		rf.mu.Lock()
-		DPrintf("Raft: [Id: %s | Term: %d | %v] - Communication error: AppendEntries() RPC failed", rf.id, rf.currentTerm, rf.state)
+		DPrintf("For server %d , term %d, state %s, case AppendEntries failed", rf.id, rf.currentTerm, rf.state)
 		rf.mu.Unlock()
 	}
 }
@@ -203,14 +208,30 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 // term. the third return value is true if this server believes it is
 // the leader.
 //
+// Start -
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	index := -1
 	term := -1
 	isLeader := true
 
-	// Your code here (2B).
+	// Your code here
 
 	return index, term, isLeader
+}
+
+//
+// the tester calls Kill() when a Raft instance won't
+// be needed again. you are not required to do anything
+// in Kill(), but it might be convenient to (for example)
+// turn off debug output from this instance.
+//
+func (rf *Raft) Kill() {
+	rf.mu.Lock()
+
+	rf.isKilled = true
+	DPrintf("For server %d , term %d, state %s, case killed", rf.id, rf.currentTerm, rf.state)
+
+	rf.mu.Unlock()
 }
 
 //
@@ -230,13 +251,12 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		peers:     peers,
 		persister: persister,
 		me:        me,
-		id:        string(rune(me + 'A')),
+		id:        me,
 		state:     "Follower",
 	}
 
-	DPrintf("Raft: [Id: %s | Term: %d | %v] - Node created", rf.id, rf.currentTerm, rf.state)
+	DPrintf("For server %d , term %d, state %s, case created", rf.id, rf.currentTerm, rf.state)
 
-	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
 	go rf.electionTimer()
@@ -244,8 +264,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	return rf
 }
 
+// electionTimeout return time between 150-300 ms (recommended election timeout value in paper)
 func electionTimeout() time.Duration {
-	return time.Duration(rand.Intn(600-300)+300) * time.Millisecond
+	return time.Duration(rand.Intn(300-150)+150) * time.Millisecond
 }
 
 func (rf *Raft) electionTimer() {
@@ -254,11 +275,11 @@ func (rf *Raft) electionTimer() {
 
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	// Start election process if we're not a leader and the haven't recieved a heartbeat for `electionTimeout`
+	// Start election
 	if rf.state != "Leader" && currentTime.Sub(rf.lastHeartBeat) >= timeout {
-		DPrintf("Raft: [Id: %s | Term: %d | %v] - Election timer timed out. Timeout: %fs", rf.id, rf.currentTerm, rf.state, timeout.Seconds())
+		DPrintf("For server %d , term %d, state %s, case electionTimer timed out, value = %fs", rf.id, rf.currentTerm, rf.state, timeout.Seconds())
 		go rf.startElection()
-	} else if !rf.isDecommisioned {
+	} else if !rf.isKilled {
 		go rf.electionTimer()
 	}
 }
@@ -270,12 +291,14 @@ func (rf *Raft) startElection() {
 	rf.currentTerm++
 	rf.votedFor = rf.id
 
-	DPrintf("Raft: [Id: %s | Term: %d | %v] - Election started", rf.id, rf.currentTerm, rf.state)
+	DPrintf("For server %d , term %d, state %s, case election started", rf.id, rf.currentTerm, rf.state)
 
-	args := RequestVoteArgs{Term: rf.currentTerm, CandidateID: rf.id}
+	args := RequestVoteArgs{
+		Term:        rf.currentTerm,
+		CandidateID: rf.id}
 	resps := make([]RequestVoteReply, len(rf.peers))
 
-	// Reset election timer in case of split vote / general unavailability
+	// Reset election timer in case of split vote
 	go rf.electionTimer()
 
 	// Request votes from peers
@@ -293,17 +316,16 @@ func (rf *Raft) startElection() {
 		if resps[respIndex].VoteGranted {
 			votes++
 		}
-		if votes > len(resps)/2 {
+		if votes > int(len(resps)/2) {
 			break // We can stop counting votes once we have majority
 		}
 	}
 
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
 
 	// Ensure that we're still a candidate and that another election did not start
 	if rf.state == "Candidate" && args.Term == rf.currentTerm {
-		DPrintf("Raft: [Id: %s | Term: %d | %v] - Election results. Vote: %d/%d", rf.id, rf.currentTerm, rf.state, votes, len(rf.peers))
+		DPrintf("For server %d , term %d, state %s,  case election results, got %d out of %d votes", rf.id, rf.currentTerm, rf.state, votes, len(rf.peers))
 		// If majority vote, become leader
 		if votes > len(rf.peers)/2 {
 			rf.state = "Leader"
@@ -311,18 +333,21 @@ func (rf *Raft) startElection() {
 			go rf.heartbeatTimer()
 		}
 	} else {
-		DPrintf("Raft: [Id: %s | Term: %d | %v] - Election for term %d interrupted", rf.id, rf.currentTerm, rf.state, args.Term)
+		DPrintf("For server %d , term %d, state %s, case election interupted, for term %d", rf.id, rf.currentTerm, rf.state, args.Term)
 	}
+	rf.mu.Unlock()
 }
 
 func (rf *Raft) sendHeartbeats() {
 	rf.mu.Lock()
 
 	// Heartbeat message
-	args := AppendEntriesArgs{Term: rf.currentTerm, LeaderID: rf.id}
+	args := AppendEntriesArgs{
+		Term:     rf.currentTerm,
+		LeaderID: rf.id}
 	resps := make([]AppendEntriesReply, len(rf.peers))
 
-	DPrintf("Raft: [Id: %s | Term: %d | %v] - Sending heartbeats to cluster", rf.id, rf.currentTerm, rf.state)
+	DPrintf("For server %d , term %d, state %s, case sending heartbeat", rf.id, rf.currentTerm, rf.state)
 
 	// Attempt to send heartbeats to all peers
 	for i := range rf.peers {
@@ -338,12 +363,12 @@ func (rf *Raft) sendHeartbeats() {
 func (rf *Raft) heartbeatTimer() {
 	rf.sendHeartbeats() // Send heartbeats to all peers as we've just become leader
 	for {
-		timeout := 300 * time.Millisecond
+		timeout := 15 * time.Millisecond // recomended timeout 0.5-20 ms
 		currentTime := <-time.After(timeout)
 
 		rf.mu.Lock()
 		shouldSendHeartbeats := rf.state == "Leader" && currentTime.Sub(rf.lastEntrySent) >= timeout
-		isDecomissioned := rf.isDecommisioned
+		isDecomissioned := rf.isKilled
 		rf.mu.Unlock()
 
 		// If we're leader and haven't had an entry for a while, then send liveness heartbeat
@@ -353,17 +378,4 @@ func (rf *Raft) heartbeatTimer() {
 			rf.sendHeartbeats()
 		}
 	}
-}
-
-//
-// the tester calls Kill() when a Raft instance won't
-// be needed again. you are not required to do anything
-// in Kill(), but it might be convenient to (for example)
-// turn off debug output from this instance.
-//
-func (rf *Raft) Kill() {
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	rf.isDecommisioned = true
-	DPrintf("Raft: [Id: %s | Term: %d | %v] - Node killed", rf.id, rf.currentTerm, rf.state)
 }
