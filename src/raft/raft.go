@@ -343,7 +343,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 // electionTimeout return a random timout value between 400-500 milliseconds on each call
 func electionTimeout() time.Duration {
-	return (500 + time.Duration(rand.Intn(500-400))) * time.Millisecond
+	return (200 + time.Duration(rand.Intn(500-200))) * time.Millisecond
 }
 
 // electionTimer keeps track of the electionTimeout and starts the elction if no leader or no heartbeat
@@ -396,7 +396,7 @@ func (rf *Raft) startElection() {
 		reply := replies[<-voteChan]
 
 		rf.mu.Lock()
-		if reply.Term > rf.currentTerm {
+		if reply.Term > rf.currentTerm && rf.state == "Candidate" {
 			rf.currentTerm = reply.Term
 			rf.state = "Follower"
 			rf.votedFor = -1
@@ -462,11 +462,11 @@ func (rf *Raft) startAppendingLogs(server int, sendAppendChan chan struct{}) {
 		select {
 		case <-sendAppendChan: // Signal that we should send a new append to this peer
 			lastEntrySent = time.Now()
-			rf.sendAppendEntriesHelper(server, sendAppendChan)
+			go rf.sendAppendEntriesHelper(server, sendAppendChan)
 		case currentTime := <-ticker.C: // If traffic has been idle, we should send a heartbeat
-			if currentTime.Sub(lastEntrySent) >= (100 * time.Millisecond) {
+			if currentTime.Sub(lastEntrySent) >= (25 * time.Millisecond) {
 				lastEntrySent = time.Now()
-				rf.sendAppendEntriesHelper(server, sendAppendChan)
+				go rf.sendAppendEntriesHelper(server, sendAppendChan)
 			}
 		}
 	}
@@ -524,6 +524,8 @@ func (rf *Raft) sendAppendEntriesHelper(server int, sendAppendChan chan struct{}
 
 	if !ok {
 		DPrintf("For server %d , term %d, state %s, case AppendEntries failed", rf.me, rf.currentTerm, rf.state)
+	} else if rf.state != "Leader" || rf.isKilled || rf.currentTerm != args.Term {
+		DPrintf("For server %d, term %d, state %s, case different state than when request was sent, discarding response", rf.me, rf.currentTerm, rf.state)
 	} else if reply.Success {
 		if len(entries) > 0 {
 			DPrintf("For server %d , term %d, case appended entries to the log of %d", rf.me, rf.currentTerm, server)
