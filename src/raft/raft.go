@@ -396,7 +396,7 @@ func (rf *Raft) startElection() {
 		reply := replies[<-voteChan]
 
 		rf.mu.Lock()
-		if reply.Term > rf.currentTerm && rf.state == "Candidate" {
+		if reply.Term > rf.currentTerm {
 			rf.currentTerm = reply.Term
 			rf.state = "Follower"
 			rf.votedFor = -1
@@ -464,7 +464,7 @@ func (rf *Raft) startAppendingLogs(server int, sendAppendChan chan struct{}) {
 			lastEntrySent = time.Now()
 			go rf.sendAppendEntriesHelper(server, sendAppendChan)
 		case currentTime := <-ticker.C: // If traffic has been idle, we should send a heartbeat
-			if currentTime.Sub(lastEntrySent) >= (25 * time.Millisecond) {
+			if currentTime.Sub(lastEntrySent) >= (100 * time.Millisecond) {
 				lastEntrySent = time.Now()
 				go rf.sendAppendEntriesHelper(server, sendAppendChan)
 			}
