@@ -21,10 +21,15 @@ func nrand() int64 {
 }
 
 func MakeClerk(servers []*labrpc.ClientEnd) *Clerk {
-	ck := new(Clerk)
-	ck.servers = servers
+	// ck := new(Clerk)
+	// ck.servers = servers
 	// You'll have to add code here.
-	ck.id = nrand()
+	// ck.id = nrand()
+
+	ck := &Clerk{
+		servers: servers,
+		id:      nrand(),
+	}
 	return ck
 }
 

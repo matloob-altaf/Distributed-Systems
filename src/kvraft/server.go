@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
-const Debug = 1
+// Debug wether to print anything or not
+const Debug = 0
 
+// DPrintf prints statements based on Debug
 func DPrintf(format string, a ...interface{}) (n int, err error) {
 	if Debug > 0 {
 		log.Printf(format, a...)
@@ -18,15 +20,26 @@ func DPrintf(format string, a ...interface{}) (n int, err error) {
 	return
 }
 
+type cmdType int
+
+//
+const (
+	Put cmdType = iota
+	Append
+	Get
+)
+
+// Op operation structure
 type Op struct {
 	// Your definitions here.
-	Command   string
+	Command   cmdType
 	Key       string
 	Value     string
 	RequestID int64
 	ClientID  int64
 }
 
+// RaftKV structure
 type RaftKV struct {
 	mu      sync.Mutex
 	me      int
@@ -38,50 +51,47 @@ type RaftKV struct {
 	// Your definitions here.
 	isKilled bool
 
-	requestHandler map[int]chan raft.ApplyMsg
-	data           map[string]string
-	latestRequests map[int64]int64 //ClientID -> last applied RequestID
+	requestHandlers map[int]chan raft.ApplyMsg
+	data            map[string]string
+	latestRequests  map[int64]int64 //ClientID -> last applied RequestID
 }
 
+// Get gets the value from reft
 func (kv *RaftKV) Get(args *GetArgs, reply *GetReply) {
-	// Your code here.
-	DPrintf("case starting get")
-	operation := Op{
-		Command:   "Get",
+	op := Op{
+		Command:   Get,
 		Key:       args.Key,
 		ClientID:  args.ClerkID,
 		RequestID: args.RequestID,
 	}
 
 	kv.mu.Lock()
-	index, _, isLeader := kv.rf.Start(operation)
+	index, _, isLeader := kv.rf.Start(op)
 	kv.mu.Unlock()
 
 	if !isLeader {
 		reply.WrongLeader = true
-		DPrintf("Operation get, case wrong leader")
 	} else {
-		isRequestSuccessful := kv.isRequestSucceeded(index, operation)
+		isRequestSuccessful := kv.isRequestSucceeded(index, op)
 		if !isRequestSuccessful {
-			DPrintf("Operation get, case wrong leader")
 			reply.WrongLeader = true
+			DPrintf("Get: Failed, node is no longer leader")
 		} else {
 			kv.mu.Lock()
-			value, isPresent := kv.data[args.Key]
-			if isPresent {
-				DPrintf("Operation get, case value recieved successfully")
+			if val, isPresent := kv.data[args.Key]; isPresent {
+				DPrintf("Get: Succeeded for key: %s", args.Key)
 				reply.Err = OK
-				reply.Value = value
+				reply.Value = val
 			} else {
-				DPrintf("Operation get, case failed to recieve value")
+				DPrintf("Get: Failed, failed for key: %s", args.Key)
 				reply.Err = ErrNoKey
 			}
 			kv.mu.Unlock()
 		}
 	}
-
 }
 
+// PutAppend put or append a value into raft
 func (kv *RaftKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 	// Your code here.
 	DPrintf("case starting PutAppend")
@@ -93,10 +103,10 @@ func (kv *RaftKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 	}
 	if args.Op == "Put" {
 		DPrintf("Operation PutAppend, case it's put")
-		operation.Command = "Put"
+		operation.Command = Put
 	} else {
 		DPrintf("Operation PutAppend, case it's Append")
-		operation.Command = "Append"
+		operation.Command = Append
 	}
 
 	kv.mu.Lock()
@@ -107,8 +117,8 @@ func (kv *RaftKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 		DPrintf("Operation PutAppend, case wrong leader")
 		reply.WrongLeader = true
 	} else {
-		isRequestSuccessful := kv.isRequestSucceeded(index, operation)
-		if !isRequestSuccessful {
+		isRequestisRequestSuccessfulful := kv.isRequestSucceeded(index, operation)
+		if !isRequestisRequestSuccessfulful {
 			DPrintf("Operation PutAppend, case wrong leader")
 			reply.WrongLeader = true
 		} else {
@@ -153,7 +163,7 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 	kv.maxraftstate = maxraftstate
 
 	// Your initialization code here.
-	kv.requestHandler = make(map[int]chan raft.ApplyMsg)
+	kv.requestHandlers = make(map[int]chan raft.ApplyMsg)
 	kv.data = make(map[string]string)
 	kv.latestRequests = make(map[int64]int64)
 
@@ -165,33 +175,33 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 }
 
 func (kv *RaftKV) startApplyProcess() {
-	DPrintf("case starting apply process")
+	DPrintf("Starting apply process")
 	for !kv.isKilled {
 		select {
 		case msg := <-kv.applyCh:
 			kv.mu.Lock()
 
-			operation := msg.Command.(Op)
+			op := msg.Command.(Op)
 
-			if operation.Command != "Get" {
-				requestID, isPresent := kv.latestRequests[operation.ClientID]
-				if !isPresent && requestID != operation.RequestID {
-					if operation.Command == "Put" {
-						kv.data[operation.Key] = operation.Value
-					} else if operation.Command == "Append" {
-						kv.data[operation.Key] += operation.Value
+			// A client will make only one call into a clerk at a time.
+			if op.Command != Get {
+				if requestID, isPresent := kv.latestRequests[op.ClientID]; !(isPresent && requestID == op.RequestID) {
+					if op.Command == Put {
+						kv.data[op.Key] = op.Value
+					} else if op.Command == Append {
+						kv.data[op.Key] += op.Value
 					}
-					kv.latestRequests[operation.ClientID] = operation.RequestID
+					kv.latestRequests[op.ClientID] = op.RequestID
 				} else {
-					DPrintf("Apply process, case duplicate write request")
+					DPrintf("Write request de-duplicated for key: %s. RId: %d, CId: %d", op.Key, op.RequestID, op.ClientID)
 				}
-
-				c, isPresent := kv.requestHandler[msg.Index]
-				if isPresent {
-					c <- msg
-				}
-				kv.mu.Unlock()
 			}
+
+			if request, isPresent := kv.requestHandlers[msg.Index]; isPresent {
+				request <- msg // TODO: Should probably send value if Get, likely false linearizability due to race conditions
+			}
+
+			kv.mu.Unlock()
 		}
 	}
 }
@@ -199,28 +209,28 @@ func (kv *RaftKV) startApplyProcess() {
 func (kv *RaftKV) isRequestSucceeded(index int, operation Op) bool {
 	DPrintf("case starting isRequestSucceeded")
 	kv.mu.Lock()
-	awaitChan := make(chan raft.ApplyMsg, 1)
-	kv.requestHandler[index] = awaitChan
+	successChan := make(chan raft.ApplyMsg, 1)
+	kv.requestHandlers[index] = successChan
 	kv.mu.Unlock()
 
 	for {
 		select {
-		case msg := <-awaitChan:
+		case msg := <-successChan:
 			kv.mu.Lock()
-			delete(kv.requestHandler, index)
+			delete(kv.requestHandlers, index)
 			kv.mu.Unlock()
 
 			if index == msg.Index && operation == msg.Command {
 				return true
-			} else {
-				return false
 			}
+			// unexpected message
+			return false
 
 		case <-time.After(10 * time.Millisecond):
 			kv.mu.Lock()
 			_, isLeader := kv.rf.GetState()
 			if !isLeader {
-				delete(kv.requestHandler, index)
+				delete(kv.requestHandlers, index)
 				kv.mu.Unlock()
 				return false
 			}
